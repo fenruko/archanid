@@ -3,94 +3,1554 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Archanid Bot - Your Ultimate Discord Assistant</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="script.js" defer></script>
+    <title>MelodyBot - Source Code Showcase</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-panel: #1e1e1e;
+            --bg-sidebar: #181818;
+            --accent: #5865F2; /* Discord Blurple */
+            --accent-hover: #4752c4;
+            --text-main: #e0e0e0;
+            --text-muted: #a0a0a0;
+            --border: #333333;
+            --code-bg: #0d0d0d;
+            
+            /* Syntax Highlighting Colors */
+            --syn-keyword: #c678dd;
+            --syn-string: #98c379;
+            --syn-comment: #5c6370;
+            --syn-func: #61afef;
+            --syn-class: #e5c07b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Layout --- */
+        header {
+            background-color: var(--bg-panel);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* --- Hero Section --- */
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(90deg, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: var(--bg-panel);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* --- Code Viewer Component --- */
+        .showcase-section {
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            background: var(--bg-panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .showcase-header {
+            padding: 1rem;
+            background: var(--bg-sidebar);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .showcase-title {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .showcase-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .file-sidebar {
+            width: 250px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .file-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 12px 20px;
+            text-align: left;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-btn:hover {
+            background: rgba(255,255,255,0.05);
+            color: var(--text-main);
+        }
+
+        .file-btn.active {
+            background: rgba(88, 101, 242, 0.1);
+            color: var(--accent);
+            border-left-color: var(--accent);
+        }
+
+        .lang-tag {
+            font-size: 0.7rem;
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+        }
+
+        .code-area {
+            flex: 1;
+            background: var(--code-bg);
+            overflow: auto;
+            position: relative;
+        }
+
+        pre {
+            margin: 0;
+            padding: 1.5rem;
+            font-family: 'Fira Code', 'Consolas', monospace;
+            font-size: 0.9rem;
+            color: #abb2bf;
+            min-height: 100%;
+        }
+
+        /* Syntax Highlighting Classes */
+        .token-keyword { color: var(--syn-keyword); }
+        .token-string { color: var(--syn-string); }
+        .token-comment { color: var(--syn-comment); font-style: italic; }
+        .token-function { color: var(--syn-func); }
+        .token-class { color: var(--syn-class); }
+        .token-number { color: #d19a66; }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-dark);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Warning Banner */
+        .warning-banner {
+            background: rgba(255, 166, 0, 0.1);
+            border: 1px solid rgba(255, 166, 0, 0.3);
+            color: #ffa500;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .showcase-body {
+                flex-direction: column;
+            }
+            .file-sidebar {
+                width: 100%;
+                height: 150px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+        }
+    </style>
 </head>
 <body>
+
     <header>
-        <div class="logo">Archanid Bot</div>
+        <div class="logo">
+            <span>🎵</span> MelodyBot
+        </div>
         <nav>
-            <a href="#commands">Commands</a>
-            <a href="#about">About</a>
-            <div class="nav-buttons">
-                <a href="https://discord.com/oauth2/authorize?client_id=1326261333930545185&permissions=1127551661636807&integration_type=0&scope=bot" class="button">Invite Me</a>
-                <a href="https://discord.gg/UwdkuUPBZ2" class="button">Support Server</a>
-            </div>
+            <a href="#" style="color: var(--text-main); text-decoration: none; font-size: 0.9rem;">Documentation</a>
         </nav>
     </header>
+
     <main>
-        <section id="hero">
-            <h1>Archanid Bot</h1>
-            <p>Your Ultimate Discord Assistant</p>
+        <section class="hero">
+            <h1>Complete Discord Music Bot</h1>
+            <p>A robust Python bot featuring music playback, Spotify integration, Last.fm scrobbling, and album collage generation. All contained in a single organized repository.</p>
+            
+            <div class="features">
+                <div class="feature-card">
+                    <span class="feature-icon">🎶</span>
+                    <h3>Music Playback</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">High quality streaming with YTDLP, queuing, and interactive buttons.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">📡</span>
+                    <h3>Last.fm Integration</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Real-time scrobbling and "Now Playing" updates for voice channels.</p>
+                </div>
+                <div class="feature-card">
+                    <span class="feature-icon">🖼️</span>
+                    <h3>Image Collages</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted);">Dynamic generation of album/artist grids based on user history.</p>
+                </div>
+            </div>
         </section>
-        <section id="commands">
-            <h2>Commands</h2>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Music Commands<span class="new-tag">NEW</span></h3>
-                <ul class="dropdown">
-                    <li><code>$play &lt;song name&gt;</code> - Play a song or add it to queue</li>
-                    <li><code>$stop</code> - Stop playing and clear the queue</li>
-                    <li><code>$skip</code> - Skip the current song</li>
-                    <li><code>$queue</code> - Show the current music queue</li>
-                    <li><code>$pause</code> - Pause the current song</li>
-                    <li><code>$resume</code> - Resume the paused song</li>
-                </ul>
+
+        <div class="warning-banner">
+            <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <div><strong>Security Note:</strong> The <code>cookies.txt</code> file below contains example credentials. Never share your real session tokens publicly.</div>
+        </div>
+
+        <section class="showcase-section">
+            <div class="showcase-header">
+                <span class="showcase-title">Source Code Explorer</span>
+                <span style="font-size: 0.8rem; color: #666;">Read-only</span>
             </div>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Admin Commands</h3>
-                <ul class="dropdown">
-                    <li><code>$setprefix &lt;new_prefix&gt;</code> - Change the server prefix</li>
-                    <li><code>$add @user &lt;amount&gt;</code> - Add coins to user's balance</li>
-                    <li><code>$banbot @user</code> - Ban user from using bot</li>
-                    <li><code>$unbanbot @user</code> - Unban user from bot</li>
-                    <li><code>$ban @user [time]</code> - Ban user from server</li>
-                    <li><code>$kick @user</code> - Kick user from server</li>
-                    <li><code>$mute @user [time]</code> - Mute a user</li>
-                    <li><code>$unmute @user</code> - Unmute a user</li>
-                    <li><code>$purge &lt;amount&gt;</code> - Delete messages</li>
-                    <li><code>$r @user &lt;role&gt;</code> - Add role to user</li>
-                </ul>
-            </div>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Economy Commands</h3>
-                <ul class="dropdown">
-                    <li><code>$daily</code> - Get daily rewards</li>
-                    <li><code>$balance</code> - Check your balance</li>
-                    <li><code>$gamble &lt;amount&gt;</code> - Gamble your coins</li>
-                    <li><code>$cf &lt;amount&gt; [heads/tails]</code> - Play coinflip</li>
-                    <li><code>$rob @user</code> - Rob another user</li>
-                </ul>
-            </div>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Game Commands</h3>
-                <ul class="dropdown">
-                    <li><code>$hunt</code> - Go hunting</li>
-                    <li><code>$battle @user</code> - Battle another user</li>
-                    <li><code>$petbattle @user</code> - Battle with your team</li>
-                    <li><code>$teamadd</code> - Create your battle team</li>
-                </ul>
-            </div>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Inventory Commands</h3>
-                <ul class="dropdown">
-                    <li><code>$inventory</code> - View your inventory</li>
-                    <li><code>$shop</code> - View the shop</li>
-                    <li><code>$buy &lt;item_number&gt; &lt;quantity&gt;</code> - Buy items</li>
-                </ul>
-            </div>
-            <div class="command-category">
-                <h3 onclick="toggleCommands(event)">Utility Commands</h3>
-                <ul class="dropdown">
-                    <li><code>$afk [reason]</code> - Set AFK status</li>
-                    <li><code>$leaderboard</code> - View top players</li>
-                    <li><code>$invite</code> - Get bot invite link</li>
-                </ul>
+            <div class="showcase-body">
+                <!-- Sidebar Navigation -->
+                <nav class="file-sidebar">
+                    <button class="file-btn active" onclick="showFile('main')">
+                        <span>main.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('music')">
+                        <span>cogs/music.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('lastfm')">
+                        <span>cogs/lastfm.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('collage')">
+                        <span>cogs/collage.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('spotify')">
+                        <span>spotify.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('database')">
+                        <span>utils/database.py</span>
+                        <span class="lang-tag">PY</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('requirements')">
+                        <span>requirements.txt</span>
+                        <span class="lang-tag">TXT</span>
+                    </button>
+                    <button class="file-btn" onclick="showFile('cookies')">
+                        <span>cookies.txt</span>
+                        <span class="lang-tag">TXT</span>
+                    </button>
+                </nav>
+
+                <!-- Code Display Area -->
+                <div class="code-area">
+                    <pre id="code-display"><code id="code-content"></code></pre>
+                </div>
             </div>
         </section>
     </main>
-    <footer>
-        <p>Archanid Bot is your ultimate assistant for managing Discord servers with advanced admin tools, fun games, and daily rewards to keep the community engaged!</p>
-    </footer>
+
+    <!-- DATA STORAGE (Hidden) -->
+    <!-- We store the raw text in script tags to keep the DOM clean and load dynamically -->
+
+    <script type="text/plain" id="file-main">
+MelodyBot - A Complete Discord Music Bot
+Main entry point
+"""
+# Replace the download section in main.py with this:
+
+
+    
+import os
+import subprocess
+import tarfile
+import shutil
+import discord
+import asyncio
+from discord.ext import commands
+from dotenv import load_dotenv
+
+# Paths
+target_path = "/home/container/ffmpeg"
+url = "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz"
+
+if not os.path.exists(target_path):
+    print("!!! FFmpeg missing. Downloading BtbN Linux build...")
+    # This command downloads the archive
+    subprocess.run(f"curl -L -o ffmpeg.tar.xz {url}", shell=True)
+    
+    print("!!! Extracting...")
+    try:
+        with tarfile.open("ffmpeg.tar.xz", "r:xz") as tar:
+            for member in tar.getmembers():
+                if member.name.endswith('bin/ffmpeg'):
+                    member.name = "ffmpeg" 
+                    tar.extract(member, path="/home/container/")
+                    break
+        
+        os.chmod("/home/container/ffmpeg", 0o755)
+        print("!!! FFmpeg is ready and permissions set to 755.")
+    except Exception as e:
+        print(f"!!! Extraction failed: {e}")
+        
+# Load environment variables
+load_dotenv()
+
+class MelodyBot(commands.Bot):
+    def __init__(self):
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.voice_states = True
+        intents.guilds = True
+        intents.members = True
+        
+        super().__init__(
+            command_prefix='!',
+            intents=intents,
+            help_command=None
+        )
+    
+    async def setup_hook(self):
+        """Load all cogs and sync commands"""
+        # Load cogs
+        cogs = ['cogs.music', 'cogs.lastfm', 'cogs.collage']
+        for cog in cogs:
+            try:
+                await self.load_extension(cog)
+                print(f'✅ Loaded {cog}')
+            except Exception as e:
+                print(f'❌ Failed to load {cog}: {e}')
+        
+        # Sync slash commands
+        await self.tree.sync()
+        print('✅ Synced slash commands')
+    
+    async def on_ready(self):
+        print(f'''
+╔══════════════════════════════════════╗
+║         MelodyBot is Online!         ║
+╠══════════════════════════════════════╣
+║  Bot: {self.user.name:<30} ║
+║  ID: {self.user.id:<31} ║
+║  Servers: {len(self.guilds):<26} ║
+╚══════════════════════════════════════╝
+        ''')
+        
+        # Set presence
+        await self.change_presence(
+            activity=discord.Activity(
+                type=discord.ActivityType.listening,
+                name="/play | 🎵"
+            )
+        )
+    
+    async def on_voice_state_update(self, member, before, after):
+        """Auto-disconnect when alone in voice channel"""
+        if member.bot:
+            return
+        
+        if before.channel and not after.channel:
+            # Someone left a voice channel
+            voice_client = member.guild.voice_client
+            if voice_client and voice_client.channel == before.channel:
+                # Check if bot is alone
+                members = [m for m in before.channel.members if not m.bot]
+                if len(members) == 0:
+                    await asyncio.sleep(30)  # Wait 30 seconds
+                    # Re-check
+                    if voice_client.is_connected():
+                        members = [m for m in voice_client.channel.members if not m.bot]
+                        if len(members) == 0:
+                            await voice_client.disconnect()
+
+def main():
+    bot = MelodyBot()
+    token = os.getenv('DISCORD_TOKEN')
+    
+    if not token:
+        print('❌ Error: DISCORD_TOKEN not found in environment variables!')
+        print('Please create a .env file with your Discord bot token.')
+        return
+    
+    bot.run(token)
+
+if __name__ == '__main__':
+    main()
+</script>
+
+    <script type="text/plain" id="file-music">
+Music Cog - With Interactive Buttons and Scrobbling Support
+"""
+
+import discord
+from discord.ext import commands
+from discord import app_commands
+import asyncio
+import yt_dlp
+from collections import deque
+from dataclasses import dataclass
+from typing import Optional
+import time
+
+# Options (same as before)
+# 1. Define YDL_OPTIONS (Fixes your NameError)
+# In music.py
+# In music.py
+
+# In music.py
+YDL_OPTIONS = {
+    'format': 'bestaudio/best',
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0',
+    'extractor_args': {
+        'youtube': {
+            'player_client': ['android', 'web'], # Android is currently more stable for bots
+        }
+    }
+}
+
+# Ensure FFMPEG_OPTIONS uses the correct local path for Pterodactyl
+FFMPEG_OPTIONS = {
+    'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
+    'options': '-vn -filter:a "volume=0.5"',
+    'executable': './ffmpeg'  # Use the local binary we downloaded earlier
+}
+
+@dataclass
+class Track:
+    title: str
+    url: str
+    duration: int
+    thumbnail: str
+    requester: discord.Member
+    artist: str = "Unknown"  # Clean artist name for scrobbling
+    track_name: str = "Unknown" # Clean track name for scrobbling
+
+class MusicControls(discord.ui.View):
+    def __init__(self, bot, guild_id):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.guild_id = guild_id
+
+    @discord.ui.button(emoji="⏯️", style=discord.ButtonStyle.primary, custom_id="mc_pause")
+    async def pause_resume(self, interaction: discord.Interaction, button: discord.ui.Button):
+        vc = interaction.guild.voice_client
+        if not vc: return await interaction.response.send_message("Not playing.", ephemeral=True)
+        
+        if vc.is_playing():
+            vc.pause()
+            await interaction.response.send_message("Paused.", ephemeral=True)
+        elif vc.is_paused():
+            vc.resume()
+            await interaction.response.send_message("Resumed.", ephemeral=True)
+
+    @discord.ui.button(emoji="⏭️", style=discord.ButtonStyle.secondary, custom_id="mc_skip")
+    async def skip(self, interaction: discord.Interaction, button: discord.ui.Button):
+        vc = interaction.guild.voice_client
+        if vc:
+            vc.stop() # This triggers the after_playing callback which plays next
+            await interaction.response.send_message("Skipped!", ephemeral=True)
+
+    @discord.ui.button(emoji="⏹️", style=discord.ButtonStyle.danger, custom_id="mc_stop")
+    async def stop(self, interaction: discord.Interaction, button: discord.ui.Button):
+        vc = interaction.guild.voice_client
+        cog = self.bot.get_cog("Music")
+        if cog:
+            cog.queues[self.guild_id].clear()
+        if vc:
+            vc.stop()
+            await vc.disconnect()
+        await interaction.response.send_message("Stopped and cleared.", ephemeral=True)
+
+    @discord.ui.button(emoji="🔁", style=discord.ButtonStyle.secondary, custom_id="mc_loop")
+    async def loop(self, interaction: discord.Interaction, button: discord.ui.Button):
+        cog = self.bot.get_cog("Music")
+        if cog:
+            queue = cog.get_queue(self.guild_id)
+            queue.loop_mode = (queue.loop_mode + 1) % 3
+            modes = ["Off", "Track", "Queue"]
+            await interaction.response.send_message(f"Loop mode: {modes[queue.loop_mode]}", ephemeral=True)
+
+class MusicQueue:
+    def __init__(self):
+        self.queue = deque()
+        self.current: Optional[Track] = None
+        self.loop_mode = 0
+
+    def add(self, track: Track):
+        self.queue.append(track)
+
+    def next(self) -> Optional[Track]:
+        if self.loop_mode == 1 and self.current: return self.current
+        if self.loop_mode == 2 and self.current: self.queue.append(self.current)
+        if self.queue:
+            self.current = self.queue.popleft()
+            return self.current
+        return None
+    
+    def clear(self):
+        self.queue.clear()
+        self.current = None
+
+class Music(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.queues: dict[int, MusicQueue] = {}
+        
+    def get_queue(self, guild_id: int) -> MusicQueue:
+        if guild_id not in self.queues: self.queues[guild_id] = MusicQueue()
+        return self.queues[guild_id]
+
+    async def search_youtube(self, query: str) -> Optional[dict]:
+        with yt_dlp.YoutubeDL(YDL_OPTIONS) as ydl:
+            try:
+                if 'http' in query: info = ydl.extract_info(query, download=False)
+                else: info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
+                return info
+            except: return None
+
+    async def update_lastfm_for_channel(self, channel: discord.VoiceChannel, track: Track):
+        """Update Now Playing for everyone in the voice channel"""
+        lastfm_cog = self.bot.get_cog("LastFM")
+        if not lastfm_cog: return
+
+        # Try to parse artist/title if generic youtube title
+        artist = track.artist
+        title = track.track_name
+        
+        # Fallback parsing for "Artist - Title" format
+        if artist == "Unknown" and " - " in track.title:
+            try:
+                parts = track.title.split(" - ", 1)
+                artist = parts[0]
+                title = parts[1]
+            except: pass
+            
+        if artist == "Unknown": artist = "[Unknown Artist]"
+
+        # Iterate all non-bot members in channel
+        for member in channel.members:
+            if not member.bot:
+                # Fire and forget
+                await lastfm_cog.update_now_playing(member.id, title, artist)
+
+    async def scrobble_for_channel(self, channel: discord.VoiceChannel, track: Track):
+        """Scrobble track at the end"""
+        lastfm_cog = self.bot.get_cog("LastFM")
+        if not lastfm_cog: return
+        
+        artist = track.artist
+        title = track.track_name
+        if artist == "Unknown" and " - " in track.title:
+            parts = track.title.split(" - ", 1)
+            artist = parts[0]; title = parts[1]
+
+        timestamp = int(time.time())
+        for member in channel.members:
+            if not member.bot:
+                await lastfm_cog.scrobble_track(member.id, title, artist, timestamp)
+
+    async def play_next(self, guild: discord.Guild):
+        queue = self.get_queue(guild.id)
+        track = queue.next()
+        if not track: return
+
+        voice_client = guild.voice_client
+        if not voice_client: return
+
+        # Setup Playback
+        source = discord.FFmpegPCMAudio(track.url, **FFMPEG_OPTIONS)
+        
+        # After playing callback (triggers scrobble and next song)
+        def after_playing(error):
+            # Scrobble the song that just finished
+            if voice_client.channel:
+                asyncio.run_coroutine_threadsafe(
+                    self.scrobble_for_channel(voice_client.channel, track), self.bot.loop
+                )
+            
+            asyncio.run_coroutine_threadsafe(self.play_next(guild), self.bot.loop)
+
+        voice_client.play(source, after=after_playing)
+
+        # 1. Update Last.fm "Now Playing" immediately
+        await self.update_lastfm_for_channel(voice_client.channel, track)
+
+        # 2. Send Interactive Embed
+        embed = discord.Embed(title="🎵 Now Playing", description=f"**[{track.title}]({track.url})**", color=discord.Color.purple())
+        if track.thumbnail: embed.set_thumbnail(url=track.thumbnail)
+        
+        view = MusicControls(self.bot, guild.id)
+        
+        # Find text channel to send update
+        if hasattr(track, 'channel_id'):
+            channel = self.bot.get_channel(track.channel_id)
+            if channel: await channel.send(embed=embed, view=view)
+
+    @app_commands.command(name="play")
+    async def play(self, interaction: discord.Interaction, query: str):
+        if not interaction.user.voice: return await interaction.response.send_message("Join a voice channel!", ephemeral=True)
+        await interaction.response.defer()
+        
+        vc = interaction.user.voice.channel
+        if not interaction.guild.voice_client: await vc.connect()
+
+        info = await self.search_youtube(query)
+        if not info: return await interaction.followup.send("No results.")
+
+        # Basic logic to extract clean metadata
+        clean_title = info.get('track', info.get('title'))
+        clean_artist = info.get('artist', 'Unknown')
+        
+        track = Track(
+            title=info['title'],
+            url=info['url'], # Stream URL
+            duration=info.get('duration', 0),
+            thumbnail=info.get('thumbnail'),
+            requester=interaction.user,
+            artist=clean_artist,
+            track_name=clean_title
+        )
+        # Store channel ID to send now playing message later
+        track.channel_id = interaction.channel_id
+        
+        queue = self.get_queue(interaction.guild.id)
+        queue.add(track)
+        
+        if not interaction.guild.voice_client.is_playing():
+            await self.play_next(interaction.guild)
+            await interaction.followup.send("Starting playback...")
+        else:
+            await interaction.followup.send(f"Added **{track.title}** to queue.")
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Music(bot))
+</script>
+
+    <script type="text/plain" id="file-lastfm">
+Last.fm Cog - Handles Scrobbling and Now Playing updates
+"""
+
+import discord
+from discord.ext import commands
+from discord import app_commands
+import aiohttp
+import os
+import hashlib
+from typing import Optional
+from utils.database import Database
+
+class LastFM(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.api_key = os.getenv('LASTFM_API_KEY')
+        self.shared_secret = os.getenv('LASTFM_SHARED_SECRET')
+        self.base_url = "http://ws.audioscrobbler.com/2.0/"
+        self.db = Database()
+    
+    def _sign_call(self, params: dict) -> str:
+        """Generate MD5 signature for Write API calls"""
+        # Sort parameters alphabetically
+        keys = sorted(params.keys())
+        sig_str = ""
+        for key in keys:
+            sig_str += f"{key}{params[key]}"
+        
+        # Append secret and hash
+        sig_str += self.shared_secret
+        return hashlib.md5(sig_str.encode('utf-8')).hexdigest()
+
+    async def api_request(self, method: str, params: dict, session_key: str = None) -> Optional[dict]:
+        """Make an authenticated API request"""
+        params['method'] = method
+        params['api_key'] = self.api_key
+        
+        if session_key:
+            params['sk'] = session_key
+            
+        # Signature is required for write methods or auth
+        if session_key or 'token' in params or method == 'track.updateNowPlaying' or method == 'track.scrobble':
+            params['api_sig'] = self._sign_call(params)
+        
+        params['format'] = 'json'
+        
+        async with aiohttp.ClientSession() as session:
+            # Write requests (scrobbling) usually require POST
+            if method in ['track.updateNowPlaying', 'track.scrobble', 'auth.getSession']:
+                async with session.post(self.base_url, data=params) as response:
+                    try:
+                        return await response.json()
+                    except:
+                        return None
+            else:
+                async with session.get(self.base_url, params=params) as response:
+                    try:
+                        return await response.json()
+                    except:
+                        return None
+
+    async def update_now_playing(self, user_id: int, title: str, artist: str):
+        """Update the 'Now Playing' status on Last.fm for a user"""
+        session_key = self.db.get_session_key(user_id)
+        if not session_key:
+            return
+
+        params = {
+            'track': title,
+            'artist': artist
+        }
+        
+        await self.api_request('track.updateNowPlaying', params, session_key)
+
+    async def scrobble_track(self, user_id: int, title: str, artist: str, timestamp: int):
+        """Scrobble a track (add to history)"""
+        session_key = self.db.get_session_key(user_id)
+        if not session_key:
+            return
+
+        params = {
+            'track': title,
+            'artist': artist,
+            'timestamp': str(timestamp)
+        }
+        
+        await self.api_request('track.scrobble', params, session_key)
+
+    # --- Commands ---
+    fm_group = app_commands.Group(name="fm", description="Last.fm commands")
+
+    @fm_group.command(name="login", description="Authenticate with Last.fm to enable Scrobbling")
+    async def fm_login(self, interaction: discord.Interaction):
+        """Start the authentication flow"""
+        await interaction.response.defer(ephemeral=True)
+        
+        # 1. Get Token
+        data = await self.api_request('auth.getToken', {})
+        if not data or 'token' not in data:
+            return await interaction.followup.send("❌ Failed to connect to Last.fm API.")
+            
+        token = data['token']
+        auth_url = f"http://www.last.fm/api/auth/?api_key={self.api_key}&token={token}"
+        
+        view = discord.ui.View()
+        btn = discord.ui.Button(label="Authorize MelodyBot", url=auth_url, style=discord.ButtonStyle.link)
+        view.add_item(btn)
+        
+        # We need a finish button to complete the handshake
+        finish_btn = discord.ui.Button(label="I have authorized", style=discord.ButtonStyle.green, custom_id=f"fm_finish_{token}")
+        
+        async def finish_callback(inter: discord.Interaction):
+            # Exchange token for Session Key
+            s_params = {'token': token}
+            sess_data = await self.api_request('auth.getSession', s_params)
+            
+            if not sess_data or 'session' not in sess_data:
+                await inter.response.send_message("❌ Authorization failed. Did you click the link?", ephemeral=True)
+                return
+
+            username = sess_data['session']['name']
+            key = sess_data['session']['key']
+            
+            # Save to DB
+            self.db.set_lastfm_session(inter.user.id, username, key)
+            await inter.response.send_message(f"✅ Successfully logged in as **{username}**! The bot will now scrobble your songs.", ephemeral=True)
+
+        finish_btn.callback = finish_callback
+        view.add_item(finish_btn)
+        
+        await interaction.followup.send(
+            "1. Click the link below to authorize.\n2. Click 'Yes, Allow Access' on the website.\n3. Come back here and click 'I have authorized'.",
+            view=view
+        )
+
+    @fm_group.command(name="profile", description="View Last.fm profile")
+    async def fm_profile(self, interaction: discord.Interaction, user: Optional[discord.Member] = None):
+        target = user or interaction.user
+        username = self.db.get_lastfm_username(target.id)
+        
+        if not username:
+            return await interaction.response.send_message("User is not logged in! Use `/fm login`.", ephemeral=True)
+            
+        # Basic profile view (Same as before, simplified for brevity)
+        params = {'user': username}
+        data = await self.api_request('user.getinfo', params)
+        if data and 'user' in data:
+            u = data['user']
+            embed = discord.Embed(title=f"Profile: {u['name']}", url=u['url'], color=discord.Color.red())
+            embed.set_thumbnail(url=u['image'][-1]['#text'])
+            embed.add_field(name="Scrobbles", value=u['playcount'])
+            await interaction.response.send_message(embed=embed)
+        else:
+            await interaction.response.send_message("❌ Profile not found.", ephemeral=True)
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(LastFM(bot))
+</script>
+
+    <script type="text/plain" id="file-collage">
+Collage Cog - Generate album art collages from Last.fm data
+Supports custom grid sizes and time periods
+"""
+
+import discord
+from discord.ext import commands
+from discord import app_commands
+import aiohttp
+from PIL import Image
+from io import BytesIO
+import os
+from typing import Optional
+
+from utils.database import Database
+
+class Collage(commands.Cog):
+    def __init__(self, bot: commands.Bot):
+        self.bot = bot
+        self.api_key = os.getenv('LASTFM_API_KEY')
+        self.base_url = "http://ws.audioscrobbler.com/2.0/"
+        self.db = Database()
+        self.default_image = None
+    
+    async def api_request(self, method: str, **params) -> Optional[dict]:
+        """Make a Last.fm API request"""
+        params['method'] = method
+        params['api_key'] = self.api_key
+        params['format'] = 'json'
+        
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.get(self.base_url, params=params) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    return None
+            except Exception as e:
+                print(f"Last.fm API error: {e}")
+                return None
+    
+    async def get_lastfm_user(self, discord_id: int) -> Optional[str]:
+        """Get linked Last.fm username for a Discord user"""
+        return self.db.get_lastfm_user(discord_id)
+    
+    async def download_image(self, url: str, session: aiohttp.ClientSession) -> Optional[Image.Image]:
+        """Download an image from URL"""
+        if not url or url == '':
+            return None
+        
+        try:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.read()
+                    return Image.open(BytesIO(data))
+        except Exception as e:
+            print(f"Image download error: {e}")
+        return None
+    
+    def create_default_image(self, size: int = 300) -> Image.Image:
+        """Create a default placeholder image"""
+        img = Image.new('RGB', (size, size), color=(40, 40, 40))
+        return img
+    
+    async def create_collage(self, images: list, grid_size: int, tile_size: int = 300) -> BytesIO:
+        """Create a collage from images"""
+        collage_size = grid_size * tile_size
+        collage = Image.new('RGB', (collage_size, collage_size), color=(20, 20, 20))
+        
+        for i, img in enumerate(images):
+            if i >= grid_size * grid_size:
+                break
+            
+            row = i // grid_size
+            col = i % grid_size
+            x = col * tile_size
+            y = row * tile_size
+            
+            if img:
+                # Resize image to tile size
+                img = img.resize((tile_size, tile_size), Image.Resampling.LANCZOS)
+                collage.paste(img, (x, y))
+            else:
+                # Use default image
+                default = self.create_default_image(tile_size)
+                collage.paste(default, (x, y))
+        
+        # Save to bytes
+        buffer = BytesIO()
+        collage.save(buffer, format='PNG', quality=95)
+        buffer.seek(0)
+        return buffer
+    
+    @app_commands.command(name="collage", description="Generate an album art collage")
+    @app_commands.describe(
+        size="Grid size (e.g., 3x3, 4x4, 5x5, up to 10x10)",
+        period="Time period for top albums"
+    )
+    @app_commands.choices(period=[
+        app_commands.Choice(name="7 days", value="7day"),
+        app_commands.Choice(name="1 month", value="1month"),
+        app_commands.Choice(name="3 months", value="3month"),
+        app_commands.Choice(name="6 months", value="6month"),
+        app_commands.Choice(name="12 months", value="12month"),
+        app_commands.Choice(name="Overall", value="overall"),
+    ])
+    async def collage_cmd(
+        self,
+        interaction: discord.Interaction,
+        size: str = "3x3",
+        period: str = "7day"
+    ):
+        """Generate album collage"""
+        username = await self.get_lastfm_user(interaction.user.id)
+        if not username:
+            return await interaction.response.send_message(
+                "You haven't linked your Last.fm account! Use `/fm set`",
+                ephemeral=True
+            )
+        
+        # Parse grid size
+        try:
+            if 'x' in size.lower():
+                grid_size = int(size.lower().split('x')[0])
+            else:
+                grid_size = int(size)
+            
+            if grid_size < 1 or grid_size > 10:
+                raise ValueError()
+        except:
+            return await interaction.response.send_message(
+                "❌ Invalid size! Use format like 3x3, 4x4, etc. (max 10x10)",
+                ephemeral=True
+            )
+        
+        await interaction.response.defer()
+        
+        # Get top albums
+        limit = grid_size * grid_size
+        data = await self.api_request(
+            'user.gettopalbums',
+            user=username,
+            period=period,
+            limit=limit
+        )
+        
+        if not data or 'error' in data:
+            return await interaction.followup.send("❌ Could not fetch albums!")
+        
+        albums = data.get('topalbums', {}).get('album', [])
+        if not albums:
+            return await interaction.followup.send("❌ No albums found for this period!")
+        
+        # Download images
+        images = []
+        async with aiohttp.ClientSession() as session:
+            for album in albums[:limit]:
+                img_url = None
+                album_images = album.get('image', [])
+                
+                # Get largest image
+                for img in reversed(album_images):
+                    if img.get('#text'):
+                        img_url = img['#text']
+                        break
+                
+                img = await self.download_image(img_url, session) if img_url else None
+                images.append(img)
+        
+        # Fill remaining slots with None
+        while len(images) < limit:
+            images.append(None)
+        
+        # Create collage
+        # Adjust tile size based on grid
+        if grid_size <= 3:
+            tile_size = 300
+        elif grid_size <= 5:
+            tile_size = 200
+        else:
+            tile_size = 150
+        
+        collage_buffer = await self.create_collage(images, grid_size, tile_size)
+        
+        period_names = {
+            '7day': 'Last 7 Days',
+            '1month': 'Last Month',
+            '3month': 'Last 3 Months',
+            '6month': 'Last 6 Months',
+            '12month': 'Last Year',
+            'overall': 'All Time'
+        }
+        
+        embed = discord.Embed(
+            title=f"🎨 {username}'s {size} Album Collage",
+            description=f"**Period:** {period_names.get(period, period)}",
+            color=discord.Color.purple()
+        )
+        embed.set_footer(text=f"Requested by {interaction.user.display_name}")
+        
+        file = discord.File(collage_buffer, filename="collage.png")
+        embed.set_image(url="attachment://collage.png")
+        
+        await interaction.followup.send(embed=embed, file=file)
+    
+    @app_commands.command(name="artistcollage", description="Generate an artist image collage")
+    @app_commands.describe(
+        size="Grid size (e.g., 3x3, 4x4, 5x5, up to 10x10)",
+        period="Time period for top artists"
+    )
+    @app_commands.choices(period=[
+        app_commands.Choice(name="7 days", value="7day"),
+        app_commands.Choice(name="1 month", value="1month"),
+        app_commands.Choice(name="3 months", value="3month"),
+        app_commands.Choice(name="6 months", value="6month"),
+        app_commands.Choice(name="12 months", value="12month"),
+        app_commands.Choice(name="Overall", value="overall"),
+    ])
+    async def artist_collage_cmd(
+        self,
+        interaction: discord.Interaction,
+        size: str = "3x3",
+        period: str = "7day"
+    ):
+        """Generate artist collage"""
+        username = await self.get_lastfm_user(interaction.user.id)
+        if not username:
+            return await interaction.response.send_message(
+                "You haven't linked your Last.fm account! Use `/fm set`",
+                ephemeral=True
+            )
+        
+        # Parse grid size
+        try:
+            if 'x' in size.lower():
+                grid_size = int(size.lower().split('x')[0])
+            else:
+                grid_size = int(size)
+            
+            if grid_size < 1 or grid_size > 10:
+                raise ValueError()
+        except:
+            return await interaction.response.send_message(
+                "❌ Invalid size! Use format like 3x3, 4x4, etc. (max 10x10)",
+                ephemeral=True
+            )
+        
+        await interaction.response.defer()
+        
+        # Get top artists
+        limit = grid_size * grid_size
+        data = await self.api_request(
+            'user.gettopartists',
+            user=username,
+            period=period,
+            limit=limit
+        )
+        
+        if not data or 'error' in data:
+            return await interaction.followup.send("❌ Could not fetch artists!")
+        
+        artists = data.get('topartists', {}).get('artist', [])
+        if not artists:
+            return await interaction.followup.send("❌ No artists found for this period!")
+        
+        # Download images
+        images = []
+        async with aiohttp.ClientSession() as session:
+            for artist in artists[:limit]:
+                img_url = None
+                artist_images = artist.get('image', [])
+                
+                # Get largest image
+                for img in reversed(artist_images):
+                    if img.get('#text'):
+                        img_url = img['#text']
+                        break
+                
+                img = await self.download_image(img_url, session) if img_url else None
+                images.append(img)
+        
+        # Fill remaining slots
+        while len(images) < limit:
+            images.append(None)
+        
+        # Create collage
+        if grid_size <= 3:
+            tile_size = 300
+        elif grid_size <= 5:
+            tile_size = 200
+        else:
+            tile_size = 150
+        
+        collage_buffer = await self.create_collage(images, grid_size, tile_size)
+        
+        period_names = {
+            '7day': 'Last 7 Days',
+            '1month': 'Last Month',
+            '3month': 'Last 3 Months',
+            '6month': 'Last 6 Months',
+            '12month': 'Last Year',
+            'overall': 'All Time'
+        }
+        
+        embed = discord.Embed(
+            title=f"🎤 {username}'s {size} Artist Collage",
+            description=f"**Period:** {period_names.get(period, period)}",
+            color=discord.Color.gold()
+        )
+        embed.set_footer(text=f"Requested by {interaction.user.display_name}")
+        
+        file = discord.File(collage_buffer, filename="artist_collage.png")
+        embed.set_image(url="attachment://artist_collage.png")
+        
+        await interaction.followup.send(embed=embed, file=file)
+
+async def setup(bot: commands.Bot):
+    await bot.add_cog(Collage(bot))
+</script>
+
+    <script type="text/plain" id="file-spotify">
+Spotify Client - Handle Spotify API interactions
+Uses spotipy library for authentication
+"""
+
+import os
+import spotipy
+from spotipy.oauth2 import SpotifyClientCredentials
+from typing import Optional
+import re
+
+class SpotifyClient:
+    def __init__(self):
+        client_id = os.getenv('SPOTIFY_CLIENT_ID')
+        client_secret = os.getenv('SPOTIFY_CLIENT_SECRET')
+        
+        if client_id and client_secret:
+            try:
+                self.sp = spotipy.Spotify(
+                    auth_manager=SpotifyClientCredentials(
+                        client_id=client_id,
+                        client_secret=client_secret
+                    )
+                )
+                self.enabled = True
+            except Exception as e:
+                print(f"Spotify initialization failed: {e}")
+                self.sp = None
+                self.enabled = False
+        else:
+            self.sp = None
+            self.enabled = False
+            print("⚠️ Spotify credentials not found. Spotify features disabled.")
+    
+    def extract_id(self, url: str) -> tuple[str, str]:
+        """Extract Spotify ID and type from URL"""
+        patterns = {
+            'track': r'spotify.com/track/([a-zA-Z0-9]+)',
+            'album': r'spotify.com/album/([a-zA-Z0-9]+)',
+            'playlist': r'spotify.com/playlist/([a-zA-Z0-9]+)',
+        }
+        
+        for item_type, pattern in patterns.items():
+            match = re.search(pattern, url)
+            if match:
+                return item_type, match.group(1)
+        
+        return None, None
+    
+    async def get_track(self, url: str) -> Optional[dict]:
+        """Get track info from Spotify URL"""
+        if not self.enabled:
+            return None
+        
+        item_type, item_id = self.extract_id(url)
+        if item_type != 'track' or not item_id:
+            return None
+        
+        try:
+            track = self.sp.track(item_id)
+            return {
+                'name': track['name'],
+                'artist': ', '.join(a['name'] for a in track['artists']),
+                'album': track['album']['name'],
+                'duration': track['duration_ms'] // 1000,
+                'thumbnail': track['album']['images'][0]['url'] if track['album']['images'] else None,
+                'url': track['external_urls']['spotify']
+            }
+        except Exception as e:
+            print(f"Spotify track error: {e}")
+            return None
+    
+    async def get_playlist_tracks(self, url: str) -> list[dict]:
+        """Get all tracks from a Spotify playlist or album"""
+        if not self.enabled:
+            return []
+        
+        item_type, item_id = self.extract_id(url)
+        if not item_id:
+            return []
+        
+        tracks = []
+        
+        try:
+            if item_type == 'playlist':
+                results = self.sp.playlist_tracks(item_id)
+                while results:
+                    for item in results['items']:
+                        track = item.get('track')
+                        if track:
+                            tracks.append({
+                                'name': track['name'],
+                                'artist': ', '.join(a['name'] for a in track['artists']),
+                                'album': track['album']['name'],
+                                'duration': track['duration_ms'] // 1000,
+                                'thumbnail': track['album']['images'][0]['url'] if track['album']['images'] else None,
+                            })
+                    
+                    if results['next']:
+                        results = self.sp.next(results)
+                    else:
+                        break
+            
+            elif item_type == 'album':
+                album = self.sp.album(item_id)
+                album_name = album['name']
+                album_art = album['images'][0]['url'] if album['images'] else None
+                artists = ', '.join(a['name'] for a in album['artists'])
+                
+                results = self.sp.album_tracks(item_id)
+                while results:
+                    for track in results['items']:
+                        tracks.append({
+                            'name': track['name'],
+                            'artist': ', '.join(a['name'] for a in track['artists']),
+                            'album': album_name,
+                            'duration': track['duration_ms'] // 1000,
+                            'thumbnail': album_art,
+                        })
+                    
+                    if results['next']:
+                        results = self.sp.next(results)
+                    else:
+                        break
+        
+        except Exception as e:
+            print(f"Spotify playlist error: {e}")
+        
+        return tracks
+    
+    async def search(self, query: str, limit: int = 5) -> list[dict]:
+        """Search Spotify for tracks"""
+        if not self.enabled:
+            return []
+        
+        try:
+            results = self.sp.search(q=query, type='track', limit=limit)
+            tracks = []
+            
+            for track in results['tracks']['items']:
+                tracks.append({
+                    'name': track['name'],
+                    'artist': ', '.join(a['name'] for a in track['artists']),
+                    'album': track['album']['name'],
+                    'duration': track['duration_ms'] // 1000,
+                    'thumbnail': track['album']['images'][0]['url'] if track['album']['images'] else None,
+                    'url': track['external_urls']['spotify']
+                })
+            
+            return tracks
+        
+        except Exception as e:
+            print(f"Spotify search error: {e}")
+            return []
+</script>
+
+    <script type="text/plain" id="file-database">
+Database Handler - Stores Last.fm session keys for scrobbling
+"""
+
+import json
+import os
+from typing import Optional
+from threading import Lock
+
+class Database:
+    def __init__(self, filename: str = "data/users.json"):
+        self.filename = filename
+        self.lock = Lock()
+        self._ensure_file()
+    
+    def _ensure_file(self):
+        os.makedirs(os.path.dirname(self.filename), exist_ok=True)
+        if not os.path.exists(self.filename):
+            self._save({})
+    
+    def _load(self) -> dict:
+        try:
+            with open(self.filename, 'r') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            return {}
+    
+    def _save(self, data: dict):
+        with open(self.filename, 'w') as f:
+            json.dump(data, f, indent=2)
+    
+    def get_lastfm_username(self, discord_id: int) -> Optional[str]:
+        with self.lock:
+            data = self._load()
+            return data.get(str(discord_id), {}).get('username')
+
+    def get_session_key(self, discord_id: int) -> Optional[str]:
+        """Get the session key required for scrobbling"""
+        with self.lock:
+            data = self._load()
+            return data.get(str(discord_id), {}).get('session_key')
+    
+    def set_lastfm_session(self, discord_id: int, username: str, session_key: str):
+        """Save username and session key"""
+        with self.lock:
+            data = self._load()
+            if str(discord_id) not in data:
+                data[str(discord_id)] = {}
+            data[str(discord_id)]['username'] = username
+            data[str(discord_id)]['session_key'] = session_key
+            self._save(data)
+    
+    def remove_user(self, discord_id: int):
+        with self.lock:
+            data = self._load()
+            if str(discord_id) in data:
+                del data[str(discord_id)]
+                self._save(data)
+</script>
+
+    <script type="text/plain" id="file-requirements">
+# MelodyBot Requirements
+# Install with: pip install -r requirements.txt
+
+# Discord
+discord.py[voice]>=2.3.0
+
+# Audio
+yt-dlp>=2024.1.0
+PyNaCl>=1.5.0
+
+# Spotify
+spotipy>=2.23.0
+
+# Last.fm & HTTP
+aiohttp>=3.9.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Environment Variables
+python-dotenv>=1.0.0
+
+# FFmpeg is also required (install separately):
+# Ubuntu/Debian: sudo apt install ffmpeg
+# macOS: brew install ffmpeg
+# Windows: Download from ffmpeg.org
+</script>
+
+    <script type="text/plain" id="file-cookies">
+# Netscape HTTP Cookie File
+# This file is generated by yt-dlp.  Do not edit.
+
+.youtube.com	TRUE	/	FALSE	1801599815	HSID	ARnxn8nmkHpDGfQAL
+.youtube.com	TRUE	/	TRUE	1801599815	SSID	AwSDNKqMfYMPsOUIL
+.youtube.com	TRUE	/	FALSE	1801599815	APISID	6vkljKEKr27AfEuF/AxgJitRmD_JhaLbds
+.youtube.com	TRUE	/	TRUE	1801599815	SAPISID	yoBwb57Q4tHuVzVC/ANNoB1CNC31IM2UIl
+.youtube.com	TRUE	/	TRUE	1801599815	__Secure-1PAPISID	yoBwb57Q4tHuVzVC/ANNoB1CNC31IM2UIl
+.youtube.com	TRUE	/	TRUE	1802081407	__Secure-3PAPISID	yoBwb57Q4tHuVzVC/ANNoB1CNC31IM2UIl
+.youtube.com	TRUE	/	FALSE	1801599815	SID	g.a0005Ai5BlWvY1Rd2FulOHsbQOrpuF3u0BjmsA9aYs-kutwjIK7loSAZ1iwsqGAugs7e-zEbdgACgYKAbcSARYSFQHGX2MiqJOHEeTiqYApt99OFBRKEhoVAUF8yKrnxqHn7j2meACkjk_Wq4TR0076
+.youtube.com	TRUE	/	TRUE	1801599815	__Secure-1PSID	g.a0005Ai5BlWvY1Rd2FulOHsbQOrpuF3u0BjmsA9aYs-kutwjIK7lwlYUKZOzNMf1lY03Q-c-8gACgYKASgSARYSFQHGX2Mi6LNNAraBCZd0p2588vqUnxoVAUF8yKp9eVzcVDY_blmw2OKBKxBe0076
+.youtube.com	TRUE	/	TRUE	1802081407	__Secure-3PSID	g.a0005Ai5BlWvY1Rd2FulOHsbQOrpuF3u0BjmsA9aYs-kutwjIK7l-W7FmM7HLM7Ph3C_O4pQ4wACgYKAYwSARYSFQHGX2MiWfXhYvXMEILEV_GAMSnyHRoVAUF8yKpZXSha-uaj3rlAcqSDT0pJ0076
+.youtube.com	TRUE	/	TRUE	1801601643	LOGIN_INFO	AFmmF2swRAIgfokb_1Fp6J3CseLQkMC3AI-3vipVOXc6GVWgT6S6JDYCIBnuLhmhvDheDH1SVjYEp99BMNZ_Ahk_fmL2XLJav2m5:QUQ3MjNmelZXbnBlU1pQTWJpTlB3Nm1CVzJxZVJUdTJuWTRnb3J1bUdFZ2NDSjgxd3BaVW9jMjY1NEpkekw5ckpPZjF5YVRGakFCSFBKc1pvZm1vS1M4d0pqeExzOTRpZmw2UWRFbXdpNzRsQUl2WWJFTC1fZTkyMGNFY0xwd3pSZWRIOWk1RUd4RGlDaUVzQl9KSXZielRiNEtoZDFsN1RR
+.youtube.com	TRUE	/	FALSE	0	PREF	f6=40000000&tz=UTC&f5=20000&f7=100&hl=en
+.youtube.com	TRUE	/	TRUE	1768421482	CONSISTENCY	APeVyi8gQImaVuOV-7YuIRl-CAsBQsvxjMG5EFsNcpZdZNxYDL1UuFxRWTftcBRzIw7_nnj8yK_QuEUW_lcCSkB9jxanHIu3KeRgxEoq9F4kjlgy0Fz03-2a09ptPGu-RyHQuke3kl6PQPan5T5k6AMP
+.youtube.com	TRUE	/	TRUE	1799956886	__Secure-1PSIDTS	sidts-CjUB7I_69A-htRaRiH2UksFputr0XJVHcbfgyxcr1wuiMHH5bXG45qPRLHxa61qOdCgMQ6STlxAA
+.youtube.com	TRUE	/	TRUE	1799956886	__Secure-3PSIDTS	sidts-CjUB7I_69A-htRaRiH2UksFputr0XJVHcbfgyxcr1wuiMHH5bXG45qPRLHxa61qOdCgMQ6STlxAA
+.youtube.com	TRUE	/	FALSE	1799957097	SIDCC	AKEyXzWjCn_DcydAZWpLqubmxCUcwo6SNPJAnpT_q5hxo3E-ywylk2SObIx8UzREjuiPO1ZpFv0
+.youtube.com	TRUE	/	TRUE	1799957097	__Secure-1PSIDCC	AKEyXzVLJtKbMcFaO5YF8uPDNRJi3tNeq-Dikvjng7GHhHXDqf8pLtc4g9zMwPzxNPWHCr00pQ
+.youtube.com	TRUE	/	TRUE	1799957097	__Secure-3PSIDCC	AKEyXzWlLWImp0OPyhmiqEmIvx_iswqa7ps66_26N8iLpPUgH9KkSfTxFJLLTUHJCf78lGrwJA
+.youtube.com	TRUE	/	TRUE	1782855134	__Secure-YNID	14.YT=YgxfAkKw76Gy92oYDInsbGAj1NpQY_6CRzfBI_AB53cPgHELuGehq-_QMO2bXYn0P0F4Akc2l00jWBEpUDzFhm_oHblAstOzQ8z71wMcjHUeHaS-PJppmLyo2zv66yxsS6vtCyXSCJxcIhNytE3bdlymFI_JGb2cGMtELJOy6ZJRFqFhpT2Ny6d0wS88kcPdHER2bQaKlgiEGjg8qrYzB7gZ0iglinBbTC0TDmRjnlwtboOyDGbwVGtxIz-TRTdsgXMQSgQAY1kfy11SzjhAFjwZUnjalYPX8uUI8t9_7Eipn5sbyNe3l_kaUCFAv00NxPiOx1ak3XlnYUwhmaQoeA
+.youtube.com	TRUE	/	TRUE	1802549097	VISITOR_PRIVACY_METADATA	CgJOTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAZ
+.youtube.com	TRUE	/	TRUE	1783934263	__Secure-ROLLOUT_TOKEN	CMqNlaXk5caIJBD9veucpeuRAxjlq9Ok2YqSAw%3D%3D
+.youtube.com	TRUE	/	TRUE	0	YSC	4QktFj_d57I
+.youtube.com	TRUE	/	TRUE	1802549093	__Secure-YEC	CgswY0dCQmtDU1dzTSjp7Z_LBjInCgJOTBIhEh0SGwsMDg8QERITFBUWFxgZGhscHR4fICEiIyQlJiAZ
+</script>
+
+    <script>
+        // Syntax Highlighting Logic
+        function highlightCode(code) {
+            // Escape HTML entities first to prevent rendering
+            let html = code.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+            // Regex for Syntax Highlighting
+            const rules = [
+                // Comments
+                { regex: /(#.*)/g, class: 'token-comment' },
+                // Strings
+                { regex: /(["'])(?:(?=(\\?))\2.)*?\1/g, class: 'token-string' },
+                // Keywords
+                { regex: /\b(import|from|def|class|return|if|else|elif|async|await|try|except|with|for|while|in|is|not|or|and|True|False|None)\b/g, class: 'token-keyword' },
+                // Functions
+                { regex: /\b([a-z_][a-z0-9_]*)(?=\()/gi, class: 'token-function' },
+                // Classes
+                { regex: /\b([A-Z][a-zA-Z0-9_]*)\b/g, class: 'token-class' },
+                // Numbers
+                { regex: /\b(\d+)\b/g, class: 'token-number' }
+            ];
+
+            // Note: This is a simple replacement. In a real production env, use PrismJS or HighlightJS
+            // because regex-based highlighting has edge cases (like strings inside comments).
+            // For this showcase, it works visually.
+            
+            // We apply comments first, then strings, then keywords to avoid conflicts roughly.
+            // (Simplified for demo)
+            
+            // Protect comments and strings by replacing them with placeholders is too complex for a single file script.
+            // We will use a simpler iterative approach.
+            
+            html = html
+                .replace(/#.*/g, match => `<span class="token-comment">${match}</span>`)
+                .replace(/(["'])(.*?)\1/g, match => `<span class="token-string">${match}</span>`)
+                .replace(/\b(import|from|def|class|return|if|else|elif|async|await|try|except|with|for|while|in|is|not|or|and|True|False|None)\b/g, match => `<span class="token-keyword">${match}</span>`)
+                .replace(/@/g, '<span class="token-keyword">@</span>') // Decorators
+                .replace(/\b(\d+)\b/g, match => `<span class="token-number">${match}</span>`);
+
+            return html;
+        }
+
+        // File Switching Logic
+        function showFile(fileId) {
+            const contentEl = document.getElementById('code-content');
+            const rawContent = document.getElementById(`file-${fileId}`).textContent;
+            
+            // Highlight
+            contentEl.innerHTML = highlightCode(rawContent);
+
+            // Update Active State in Sidebar
+            document.querySelectorAll('.file-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // Initialize with Main
+        document.addEventListener('DOMContentLoaded', () => {
+            const initialContent = document.getElementById('file-main').textContent;
+            document.getElementById('code-content').innerHTML = highlightCode(initialContent);
+        });
+    </script>
 </body>
 </html>
